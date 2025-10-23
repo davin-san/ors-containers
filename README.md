@@ -84,7 +84,7 @@ docker compose build
     *   Type `gemini --version` in the terminal to confirm `gemini-cli` is working.
 
 **Using Your Custom gem5 Command**
-The container has a custom build script.
+*   The container has a custom build script.
 1.  From the VS Code terminal (which is already in `/app/garnet-web-visualizer`), navigate to your gem5 fork's directory:
 
 ```bash
