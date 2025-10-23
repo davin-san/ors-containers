@@ -83,6 +83,20 @@ docker compose build
     *   Your local `garnet-web-visualizer` and `gem5-tracer` folders are now "fused" with the container.
     *   Type `gemini --version` in the terminal to confirm `gemini-cli` is working.
 
+**Using Your Custom gem5 Command**
+The container has a custom build script.
+1.  From the VS Code terminal (which is already in `/app/garnet-web-visualizer`), navigate to your gem5 fork's directory:
+
+```bash
+cd /app/my-gem5-fork
+```
+2.  To build your gem5 fork (this will use ccache for a fast incremental build):
+
+```bash
+gem5-build
+```
+
+
 ## Step 3: How to "Update" and "Backup"
 
 ### Updating Your Base Image
