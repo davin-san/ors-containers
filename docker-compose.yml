@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # This is the name of our development service
+  dev:
+    # --- OPTION 1: Build from the Dockerfile ---
+    # This is for the first-time build.
+    build: .
+
+    # --- OPTION 2: Use a pre-built image ---
+    # After your first build and "snapshot", comment out "build: ."
+    # and uncomment this line to use your fast pre-built image.
+    # image: gem5-dev:v1
+
+    # This is the "fusion" part. We mount the other repos (which are
+    # in sibling folders) into the container.
+    volumes:
+      # 1. Mount the visualizer code
+      - ../garnet-web-visualizer:/app/garnet-web-visualizer:cached
+
+      # 2. Mount your gem5 fork
+      - ../my-gem5-fork:/app/my-gem5-fork:cached
+
+      # 3. Mount the persistent ccache volume
+      - gem5-ccache:/root/.ccache
+
+    # Keep the container running in the background
+    command: sleep infinity
+
+    # Set a consistent container name for easy snapshotting
+    container_name: gem5-dev-container
+
+# This defines the named volume for ccache, so it persists
+volumes:
+  gem5-ccache:
+
