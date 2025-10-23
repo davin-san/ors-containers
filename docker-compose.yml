@@ -19,7 +19,7 @@ services:
       - ../garnet-web-visualizer:/app/garnet-web-visualizer:cached
 
       # 2. Mount your gem5 fork
-      - ../my-gem5-fork:/app/my-gem5-fork:cached
+      - ../gem5-tracer:/app/gem5-tracer:cached
 
       # 3. Mount the persistent ccache volume
       - gem5-ccache:/root/.ccache
