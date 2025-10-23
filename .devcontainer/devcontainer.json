@@ -1,35 +1,32 @@
 {
-  "name": "gem5-dev-environment",
-
-  // This tells VS Code to use your new Docker Compose file
-  // The path is relative to this .devcontainer.json file.
-  "dockerComposeFile": [
-    "../docker-compose.yml"
-  ],
-
-  // This is the name of the service in docker-compose.yml
-  "service": "dev",
-
-  // This is the folder VS Code will open *inside* the container.
-  // Even though you open the 'gem5-dev-workflow' project,
-  // VS Code will land you right in your application code.
-  "workspaceFolder": "/app/garnet-web-visualizer",
-
-  "customizations": {
-    "vscode": {
-      // A list of extensions to automatically install inside the container
-      "extensions": [
-        "ms-vscode.cpptools",
-        "ms-python.python",
-        "Google.gemini-code-assist"
-      ]
-    }
-  },
-
-  // Set the default user to root
-  "remoteUser": "root",
-
-  // Command to run after the container is created.
-  "postCreateCommand": "ccache -M 50G"
+	"name": "ors-dev-env",
+	
+	// Points to our docker-compose.yml file in the same directory
+	"dockerComposeFile": "docker-compose.yml",
+	
+	// The name of the service in docker-compose.yml to use
+	"service": "dev",
+	
+	// This is now the folder containing our .code-workspace file
+	"workspaceFolder": "/app/ors-containers",
+	
+	"forwardPorts": [8501],
+	
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"tamasfe.even-better-toml"
+			]
+		}
+	},
+	
+	// This command runs after the container is created.
+	// It tells VS Code to automatically open your new workspace,
+	// which brings both folders into your sidebar.
+	"postCreateCommand": "code ors-dev.code-workspace",
+	
+	// Run as root inside the container for easier package installs
+	"remoteUser": "root"
 }
 

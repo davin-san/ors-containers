@@ -1,14 +1,13 @@
 services:
   # This is the name of our development service
   dev:
-    # --- OPTION 1: Build from the Dockerfile ---
-    # This is for the first-time build.
-    build: .
+    # --- This 'build' section is now more specific ---
+    build:
+      context: . # Use the current directory as the build context
+      dockerfile: gem5-dev.Dockerfile # Tell it to use our specific Dockerfile
 
-    # --- OPTION 2: Use a pre-built image ---
-    # After your first build and "snapshot", comment out "build: ."
-    # and uncomment this line to use your fast pre-built image.
-    # image: gem5-dev:v1
+    # The image name is built from the .env file (e.g., ors-dev:latest)
+    image: ${IMAGE_TAG}
 
     # This is the "fusion" part. We mount the other repos (which are
     # in sibling folders) into the container.
@@ -18,15 +17,18 @@ services:
 
       # 2. Mount your gem5 fork
       - ../gem5-tracer:/app/gem5-tracer:cached
+      
+      # 3. Mount this workflow repo so we can open the .code-workspace file
+      - .:/app/ors-containers:cached
 
-      # 3. Mount the persistent ccache volume
-      - gem5-ccache:/root/.ccache
+      # 4. Mount the persistent ccache volume
+      - gem5-ccache:/root/.cache/ccache
 
     # Keep the container running in the background
     command: sleep infinity
 
     # Set a consistent container name for easy snapshotting
-    container_name: gem5-dev-container
+    container_name: ors-dev-container
 
 # This defines the named volume for ccache, so it persists
 volumes:
