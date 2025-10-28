@@ -5,7 +5,6 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # --- 1. Install System Dependencies & Build Tools ---
-# (This is all that should be in the base image)
 RUN apt-get update && apt-get install -y \
     build-essential \
     git \
@@ -37,26 +36,35 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # --- 2. Install Python Dependencies ---
-# Install gemini-cli globally
-RUN pip3 install -U google-generativeai
+RUN pip install mypy pre-commit streamlit pandas-stubs
 
-# Install Python tools
-RUN pip3 install mypy pre-commit
+# --- 2.5 Setup Gemini CLI ---
+# Add the NodeSource repository for Node.js 20.x (LTS)
+# Replace 'setup_20.x' with 'setup_current.x' for the latest release
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get remove -y libnode-dev
+
+# Install Node.js (this will also update it if a previous version was installed via apt)
+RUN apt-get install -y nodejs
+
+RUN npm install -g @google/gemini-cli
 
 # --- 3. Configure ccache ---
 # Set up ccache to be used automatically
-# This creates shims in a directory that's first in the PATH
 RUN ln -s /usr/bin/ccache /usr/local/bin/g++
 RUN ln -s /usr/bin/ccache /usr/local/bin/gcc
 RUN ln -s /usr/bin/ccache /usr/local/bin/c++
 RUN ln -s /usr/bin/ccache /usr/local/bin/cc
 ENV PATH="/usr/local/bin:${PATH}"
 
-# Set a working directory
-WORKDIR /app
+# --- 4. Set workdir to where our code will live ---
+WORKDIR /workspace
 
-# --- 4. Add the build script ---
-# This script will now build WHATEVER is in your mounted /app/my-gem5-fork
+# --- 5. Add our build and setup scripts ---
 COPY gem5-build.sh /usr/local/bin/gem5-build
 RUN chmod +x /usr/local/bin/gem5-build
+
+# This is our new setup script
+COPY on-create.sh /usr/local/bin/on-create
+RUN chmod +x /usr/local/bin/on-create
 

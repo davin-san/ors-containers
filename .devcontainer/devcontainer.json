@@ -1,32 +1,35 @@
 {
-	"name": "ors-dev-env",
-	
-	// Points to our docker-compose.yml file in the same directory
-	"dockerComposeFile": "docker-compose.yml",
-	
-	// The name of the service in docker-compose.yml to use
+	"name": "ORS Dev Environment",
+
+	// 1. Tell VS Code to use your Docker Compose file
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	],
+
+	// 2. Tell VS Code which service in the compose file to use
 	"service": "dev",
-	
-	// This is now the folder containing our .code-workspace file
-	"workspaceFolder": "/app/ors-containers",
-	
-	"forwardPorts": [8501],
-	
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"ms-python.python",
-				"tamasfe.even-better-toml"
-			]
-		}
-	},
-	
-	// This command runs after the container is created.
-	// It tells VS Code to automatically open your new workspace,
-	// which brings both folders into your sidebar.
-	"postCreateCommand": "code ors-dev.code-workspace",
-	
-	// Run as root inside the container for easier package installs
-	"remoteUser": "root"
+
+	// 3. Tell VS Code to open the workspace file *inside* the container
+	//    This file will be CREATED by our setup script.
+	"workspaceFile": "/workspace/ors-dev.code-workspace",
+
+	// 4. The "home" folder for the container
+	"workspaceFolder": "/workspace",
+
+	"extensions": [
+		"ms-vscode.cpptools",
+		"ms-python.python",
+		"ms-python.mypy-type-checker"
+	],
+
+	// 5. This script runs *once* to clone your repos and run the first build
+	//
+	//    FIX: Removed ".sh" to match the name in the Dockerfile
+	//
+	"onCreateCommand": "/usr/local/bin/on-create",
+
+	// 6. Ensures the container re-uses the persistent volumes
+	"shutdownAction": "stopContainer"
 }
+
 

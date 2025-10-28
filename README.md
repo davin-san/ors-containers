@@ -1,156 +1,113 @@
-# ORS Development Workflow: VS Code + Pre-compiled Containers
+# ORS Development Workflow: VS Code + Automated Dev Containers
 
-This repository (`ors-containers`) defines a high-speed, isolated development environment. It is designed to "fuse" with your application code (like `garnet-web-visualizer` and `gem5-tracer`) which lives in separate repositories.
+This repository (`ors-containers`) defines a high-speed, isolated development environment for VS Code. It is designed to "fuse" with your application code (like `garnet-web-visualizer` and `gem5-tracer`) which lives in separate repositories.
+
+This setup automates the entire build process. You no longer need to manually `docker commit` or manage image tags.
 
 ## The Goal
 
-*   **Separate Concerns:** Your environment (this repo) is separate from your application code (`garnet-web-visualizer` and `gem5-tracer`).
-*   **Build Your Fork:** The `Dockerfile` provides tools. You provide the `gem5` code via your `gem5-tracer` fork.
-*   **Fuse & Connect:** VS Code launches a container with the tools. The container "fuses" with your code repos by mounting them as volumes.
-*   **Multi-Root Workspace:** VS Code will open both `garnet-web-visualizer` and `gem5-tracer` in the same window.
-*   **Snapshot Your Build:** You'll run one initial slow compile of your fork inside the container, then "snapshot" that state as your new pre-compiled base image.
-*   **Iterate Fast:** All future builds will use the pre-compiled snapshot and `ccache` for incredibly fast incremental changes.
+*   **Separate Concerns**: Your environment (this repo) is separate from your application code (`garnet-web-visualizer` and `gem5-tracer`).
+*   **Automated First Build**: The first time you open the container, it will automatically run the slow `gem5-build` script for you.
+*   **Persistent Cache**: All subsequent builds use a persistent `ccache` volume, making incremental compiles incredibly fast.
+*   **Fuse & Connect**: VS Code launches a container with the tools. The container "fuses" with your code repos by mounting them as volumes.
+*   **Multi-Root Workspace**: VS Code automatically opens both repositories (`garnet-web-visualizer`, `gem5-tracer`) in one window.
 
 ## Step 1: Initial Setup (Do this once)
 
-### Create your Project Directory:
+1.  **Create your Project Directory:**
+    On your local machine, create a parent folder for all your projects.
+    ```bash
+    mkdir /ors-project/
+    cd /ors-project/
+    ```
 
-On your local machine, create a parent folder for all your projects.
+2.  **Clone Your Repositories:**
+    Clone this workflow repo and your application repo(s) as siblings.
+    ```bash
+    # Clone this environment repo
+    git clone https://github.com/davin-san/ors-containers.git
 
-```bash
-mkdir /my-projects/
-cd /my-projects/
-```
+    # Clone your web visualizer repo
+    git clone https://github.com/davin-san/garnet-web-visualizer.git
 
-### Clone Your Repositories:
+    # Clone your gem5 fork (e.g., v22.1)
+    git clone https://github.com/davin-san/gem5-tracer.git
+    ```
 
-Clone this workflow repo and your application repo(s) as siblings.
+3.  **Your directory structure must look like this:**
+    ```
+    /ors-project/
+    ├── ors-containers/         <-- THIS REPO
+    │   ├── .devcontainer/
+    │   │   └── devcontainer.json
+    │   ├── .env
+    │   ├── docker-compose.yml
+    │   ├── gem5-build.sh
+    │   ├── gem5-dev.Dockerfile
+    │   ├── on-create.sh
+    │   └── README.md
+    │
+    ├── garnet-web-visualizer/  <-- YOUR APP REPO
+    │
+    └── gem5-tracer/            <-- YOUR GEM5 FORK
+    ```
 
-```bash
-# Clone this environment repo
-git clone https://github.com/davin-san/ors-containers.git
+## Step 2: The New Automated Workflow
 
-# Clone your web visualizer repo
-git clone https://github.com/davin-san/garnet-web-visualizer.git
+This is the only step you will ever need.
 
-# Clone your gem5 fork (e.g., v22.1)
-git clone https://github.com/davin-san/gem5-tracer.git
-```
+1.  **Launch the Dev Container:**
+    *   Open the `/ors-project/ors-containers` folder in VS Code.
+    *   A dialog will pop up. Click "Reopen in Container".
 
-Your directory structure must look like this:
+2.  **Wait.** The first time you do this, VS Code will:
+    *   Build your `gem5-dev.Dockerfile` (if it's not already built).
+    *   Start the container.
+    *   Automatically run the `gem5-build` script (this is the one-time slow compile). You will see the build output in the VS Code terminal.
+    *   Once finished, VS Code will connect, and your multi-root workspace will be open. Your code is compiled, and your `ccache` volume is populated.
 
-```
-/my-projects/
-├── ors-containers/         <-- THIS REPO
-│   ├── .devcontainer/
-│   ├── .env
-│   ├── docker-compose.yml
-│   ├── gem5-dev.Dockerfile
-│   ├── gem5-build.sh
-│   ├── ors-dev.code-workspace
-│   └── DEV_WORKFLOW.md
-│
-├── garnet-web-visualizer/  <-- YOUR APP REPO
-│
-└── gem5-tracer/            <-- YOUR GEM5 FORK
-```
-
-### Build the Tools Image:
-
-This is now very fast as it only installs dependencies.
-
-1.  Open a terminal inside the `/my-projects/ors-containers` directory.
-2.  Run the build command. This builds your `gem5-dev.Dockerfile` and tags it `ors-dev:base` (or as set in `.env`).
-
-```bash
-docker compose build
-```
-
-## Step 2: One-Time gem5 Compile & Snapshot
-
-This is the critical step. You will do this once to create your true pre-compiled base image.
-
-### Launch the Dev Container:
-
-1.  Open the `/my-projects/ors-containers` folder in VS Code.
-2.  Click "Reopen in Container" when prompted.
-
-### Run the Initial Slow Build:
-
-VS Code will open and automatically load your workspace. You will see both `garnet-web-visualizer` and `gem5-tracer` in the "Explorer" sidebar.
-
-In the VS Code terminal, run the `gem5-build` command. This will navigate to `/app/gem5-tracer` and run the full `scons` compile.
-
-```bash
-gem5-build
-```
-
-This will take a long time, but it will only happen once.
-
-### Create Your "Compiled" Snapshot:
-
-While the container is still running, open a separate **HOST** terminal.
-
-Commit the container's state to a new image. Give it a descriptive tag like `v1`.
-
-```bash
-# Usage: docker commit <container-name> <new-image-tag>
-docker commit ors-dev-container ors-dev:v1
-```
-
-### Point to Your New Snapshot:
-
-Your base image is now compiled!
-
-1.  Open the `.env` file (in `ors-containers`).
-2.  Change the `IMAGE_TAG` to point to your new snapshot:
-
-```diff
-# From:
-IMAGE_TAG=ors-dev:base
-
-# To:
-IMAGE_TAG=ors-dev:v1
-```
-
-### Reload the Container:
-
-1.  In VS Code, open the Command Palette (`Ctrl+Shift+P`).
-2.  Type `Dev Containers: Rebuild Container` and run it.
-
-VS Code will restart, this time using your new `ors-dev:v1` image which has your fork already built.
-
-## Step 3: Daily Development Workflow
-
-### Open Project:
-
-Open `/my-projects/ors-containers` in VS Code. It will automatically re-open in your `v1` container and show both project folders.
-
-### Work on Code (Seamlessly):
-
-*   **To edit the visualizer:** Find files in the `garnet-web-visualizer` folder in the sidebar. Right-click the folder and select "Open in Integrated Terminal" to open a terminal there and run `git` commands or `streamlit run Home.py`.
-*   **To edit gem5:** Find files in the `gem5-tracer` folder in the sidebar. Edit code.
-*   **To re-compile gem5:** Run `gem5-build` in any terminal. This will be an extremely fast incremental build.
-*   **To commit gem5 changes:** Right-click the `gem5-tracer` folder, select "Open in Integrated Terminal", and run your `git` commands.
+3.  **Daily Development:**
+    *   Open `/ors-project/ors-containers` in VS Code.
+    *   Click "Reopen in Container".
+    *   It will instantly connect to your existing, pre-compiled container (it will not re-run the slow build).
+    *   You are ready to code.
 
 ## How to...
 
-### ...Update Your Base gem5 Build?
+### ...Re-compile gem5?
 
-If you pull major changes into your `gem5-tracer` fork and want to create a new snapshot:
+You've edited code in `gem5-tracer` and want to build it.
 
-1.  Run `gem5-build` (it might be slow as it builds the new changes).
-2.  Commit the container again with a new tag: `docker commit ors-dev-container ors-dev:v2`
-3.  Update your `.env` file to point to `ors-dev:v2`.
-4.  `Dev Containers: Rebuild Container`.
+1.  Open the VS Code terminal (it's already inside the container).
+2.  Run the build command:
+    ```bash
+    gem5-build
+    ```
+    This will be an extremely fast incremental build thanks to `ccache`.
 
-### ...Go Back to a Backup?
+### ...Fix a Broken Code Build?
 
-If your current build breaks, just edit your `.env` file to point to an older, working tag (like `ors-dev:v1`) and rebuild the container.
+You edited `gem5-tracer`, and now `gem5-build` fails.
+
+1.  You don't need to touch the container. Just use `git`.
+2.  Right-click the `gem5-tracer` folder in the sidebar -> "Open in Integrated Terminal".
+3.  Run `git checkout .` or `git stash` to revert your changes.
+4.  Run `gem5-build` again. It will be fast.
 
 ### ...Update the Tools (e.g., install a new apt package)?
 
-1.  Add the `apt-get install` line to your `gem5-dev.Dockerfile`.
-2.  Set your `.env` file to build a new base image: `IMAGE_TAG=ors-dev:base`
-3.  Run `docker compose build` from your host terminal.
-4.  You'll now need to do the "One-Time gem5 Compile" (Step 2) again to create a new compiled snapshot based on these new tools.
+You add `vim` to your `gem5-dev.Dockerfile` and want the change.
+
+1.  Make your edits to `gem5-dev.Dockerfile`.
+2.  Open the VS Code Command Palette (`Ctrl+Shift+P`).
+3.  Run `Dev Containers: Rebuild Container`.
+4.  Wait. This will create a new container and re-run the `gem5-build` script once.
+    *   This build will still be fast because it will re-use your existing `gem5-ccache` volume.
+
+### ...Fix a Completely Broken Container?
+
+You `rm -rf /` by accident and the container is dead.
+
+1.  Open the VS Code Command Palette (`Ctrl+Shift+P`).
+2.  Run `Dev Containers: Rebuild Container`.
+    *   This creates a fresh container and re-runs `gem5-build`, which will be fast thanks to the `ccache` volume. You lose no compiled work.

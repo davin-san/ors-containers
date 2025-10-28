@@ -1,7 +1,6 @@
 services:
   # This is the name of our development service
   dev:
-    # --- This 'build' section is now more specific ---
     build:
       context: . # Use the current directory as the build context
       dockerfile: gem5-dev.Dockerfile # Tell it to use our specific Dockerfile
@@ -9,28 +8,22 @@ services:
     # The image name is built from the .env file (e.g., ors-dev:latest)
     image: ${IMAGE_TAG}
 
-    # This is the "fusion" part. We mount the other repos (which are
-    # in sibling folders) into the container.
+    # These volumes are persistent and live on your host, managed by Docker
     volumes:
-      # 1. Mount the visualizer code
-      - ../garnet-web-visualizer:/app/garnet-web-visualizer:cached
+      # 1. A persistent volume for all your source code
+      - ors-workspace:/workspace:cached
 
-      # 2. Mount your gem5 fork
-      - ../gem5-tracer:/app/gem5-tracer:cached
-      
-      # 3. Mount this workflow repo so we can open the .code-workspace file
-      - .:/app/ors-containers:cached
-
-      # 4. Mount the persistent ccache volume
+      # 2. A persistent volume for your gem5 build cache
       - gem5-ccache:/root/.cache/ccache
 
     # Keep the container running in the background
     command: sleep infinity
 
-    # Set a consistent container name for easy snapshotting
+    # Set a consistent container name
     container_name: ors-dev-container
 
-# This defines the named volume for ccache, so it persists
+# This defines the named volumes, so they persist
 volumes:
   gem5-ccache:
+  ors-workspace:
 
