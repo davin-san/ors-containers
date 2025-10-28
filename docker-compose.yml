@@ -5,8 +5,7 @@ services:
       context: . # Use the current directory as the build context
       dockerfile: gem5-dev.Dockerfile # Tell it to use our specific Dockerfile
 
-    # The image name is built from the .env file (e.g., ors-dev:latest)
-    image: ${IMAGE_TAG}
+    image: gem5-dev:latest
 
     # These volumes are persistent and live on your host, managed by Docker
 # These volumes are persistent and live on your host, managed by Docker

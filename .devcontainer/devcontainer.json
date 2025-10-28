@@ -23,9 +23,6 @@
 	],
 
 	// 5. This script runs *once* to clone your repos and run the first build
-	//
-	//    FIX: Removed ".sh" to match the name in the Dockerfile
-	//
 	"onCreateCommand": "/usr/local/bin/on-create",
 
 	// 6. Ensures the container re-uses the persistent volumes

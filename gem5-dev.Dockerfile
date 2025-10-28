@@ -60,6 +60,7 @@ ENV PATH="/usr/local/bin:${PATH}"
 # --- 4. Set workdir to where our code will live ---
 WORKDIR /workspace
 
+
 # --- 5. Add our build and setup scripts ---
 COPY gem5-build.sh /usr/local/bin/gem5-build
 RUN chmod +x /usr/local/bin/gem5-build

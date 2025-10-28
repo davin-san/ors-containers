@@ -14,42 +14,38 @@ This setup automates the entire build process. You no longer need to manually `d
 
 ## Step 1: Initial Setup (Do this once)
 
-1.  **Create your Project Directory:**
-    On your local machine, create a parent folder for all your projects.
+1.  **Clone this repository:**
     ```bash
-    mkdir /ors-project/
-    cd /ors-project/
-    ```
-
-2.  **Clone Your Repositories:**
-    Clone this workflow repo and your application repo(s) as siblings.
-    ```bash
-    # Clone this environment repo
     git clone https://github.com/davin-san/ors-containers.git
-
-    # Clone your web visualizer repo
-    git clone https://github.com/davin-san/garnet-web-visualizer.git
-
-    # Clone your gem5 fork (e.g., v22.1)
-    git clone https://github.com/davin-san/gem5-tracer.git
+    cd ors-containers
     ```
 
-3.  **Your directory structure must look like this:**
+2.  **Run the setup script:**
+    This script will clone the necessary sibling repositories (`garnet-web-visualizer` and `gem5-tracer`) and build/start the Docker containers.
+    ```bash
+    python setup.py
     ```
-    /ors-project/
+    You can optionally specify different repository URLs:
+    ```bash
+    python setup.py --garnet-repo https://github.com/your-fork/garnet-web-visualizer.git \
+                    --gem5-repo https://github.com/your-fork/gem5-tracer.git
+    ```
+
+3.  **Your directory structure must look like this (after running setup.py):**
+    ```
+    /your-project-root/
     ├── ors-containers/         <-- THIS REPO
     │   ├── .devcontainer/
-    │   │   └── devcontainer.json
-    │   ├── .env
     │   ├── docker-compose.yml
     │   ├── gem5-build.sh
     │   ├── gem5-dev.Dockerfile
     │   ├── on-create.sh
-    │   └── README.md
+    │   ├── README.md
+    │   └── setup.py
     │
-    ├── garnet-web-visualizer/  <-- YOUR APP REPO
+    ├── garnet-web-visualizer/  <-- YOUR APP REPO (cloned by setup.py)
     │
-    └── gem5-tracer/            <-- YOUR GEM5 FORK
+    └── gem5-tracer/            <-- YOUR GEM5 FORK (cloned by setup.py)
     ```
 
 ## Step 2: The New Automated Workflow
