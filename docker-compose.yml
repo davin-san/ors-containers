@@ -10,9 +10,9 @@ services:
     # These volumes are persistent and live on your host, managed by Docker
 # These volumes are persistent and live on your host, managed by Docker
     volumes:
-      # 1. "Fuse" (bind mount) your local source code folders
-      - ../gem5-tracer:/workspace/gem5-tracer:cached
-      - ../garnet-web-visualizer:/workspace/garnet-web-visualizer:cached
+      # 1. Use named volumes for the source code
+      - gem5-source:/workspace/gem5-tracer
+      - garnet-visualizer-source:/workspace/garnet-web-visualizer
 
       # 2. A persistent volume for your gem5 build cache
       - gem5-ccache:/root/.cache/ccache
@@ -26,4 +26,6 @@ services:
 # This defines the named volumes, so they persist
 volumes:
   gem5-ccache:
+  gem5-source:
+  garnet-visualizer-source:
 
