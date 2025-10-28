@@ -9,9 +9,11 @@ services:
     image: ${IMAGE_TAG}
 
     # These volumes are persistent and live on your host, managed by Docker
+# These volumes are persistent and live on your host, managed by Docker
     volumes:
-      # 1. A persistent volume for all your source code
-      - ors-workspace:/workspace:cached
+      # 1. "Fuse" (bind mount) your local source code folders
+      - ../gem5-tracer:/workspace/gem5-tracer:cached
+      - ../garnet-web-visualizer:/workspace/garnet-web-visualizer:cached
 
       # 2. A persistent volume for your gem5 build cache
       - gem5-ccache:/root/.cache/ccache
@@ -25,5 +27,4 @@ services:
 # This defines the named volumes, so they persist
 volumes:
   gem5-ccache:
-  ors-workspace:
 

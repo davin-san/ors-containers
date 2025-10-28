@@ -16,15 +16,7 @@ fi
 
 echo "--- Initializing New Dev Workspace ---"
 
-# 1. Clone Repos
-# These are cloned *inside* the container's persistent volume
-echo "Cloning gem5-tracer..."
-git clone https://github.com/davin-san/gem5-tracer.git /workspace/gem5-tracer
-
-echo "Cloning garnet-web-visualizer..."
-git clone https://github.com/davin-san/garnet-web-visualizer.git /workspace/garnet-web-visualizer
-
-# 2. Create the workspace file for VS Code
+# 1. Create the workspace file for VS Code
 echo "Creating VS Code workspace file..."
 cat << 'EOF' > /workspace/ors-dev.code-workspace
 {
@@ -38,11 +30,10 @@ cat << 'EOF' > /workspace/ors-dev.code-workspace
 }
 EOF
 
-# 3. Run the initial slow build (populates ccache)
+# 2. Run the initial slow build (populates ccache)
 echo "Running initial gem5 build. This will be slow..."
 /usr/local/bin/gem5-build
 
-# 4. Create the flag file to prevent this from running again
+# 3. Create the flag file to prevent this from running again
 touch $SETUP_FLAG
 echo "--- Workspace initialization complete! ---"
-
