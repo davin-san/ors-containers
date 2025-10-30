@@ -8,7 +8,8 @@ This setup automates the entire build process. You no longer need to manually `d
 
 *   **Separate Concerns**: Your environment (this repo) is separate from your application code (`garnet-web-visualizer` and `gem5-tracer`).
 *   **Automated First Build**: The first time you open the container, it will automatically clone the required repositories and run the slow `gem5-build` script for you.
-*   **Persistent Cache & Source**: All subsequent builds use a persistent `ccache` volume, making incremental compiles incredibly fast. The source code is also stored in a persistent volume, so it is not lost when the container is rebuilt.
+*   **Persistent Cache & Source**: All subsequent builds use a persistent `ccache` volume, making incremental compiles incredibly fast (~10x faster). The source code is also stored in a persistent volume, so it is not lost when the container is rebuilt.
+*   **Fast Linking**: Utilize `lld` through `clang` to significantly speed up the linking phase of `gem5` builds (~2x faster).
 *   **Multi-Root Workspace**: VS Code automatically opens both repositories (`garnet-web-visualizer`, `gem5-tracer`) in one window.
 
 ## The Automated Workflow
@@ -25,8 +26,10 @@ This is the only step you will ever need.
     *   Automatically clone the `gem5-tracer` and `garnet-web-visualizer` repositories into named volumes.
     *   Automatically run the `gem5-build` script (this is the one-time slow compile). You will see the build output in the VS Code terminal.
     *   Once finished, VS Code will connect, and your multi-root workspace will be open. Your code is compiled, and your `ccache` volume is populated.
+    *   Navigate to `ors-dev.code-workspace` and click "Open Workspace" to start working.
 
 3.  **Daily Development:**
+    *   Simply open your old `ors-containers @ desktop-linux` dev workspace or...
     *   Open `ors-containers` in VS Code.
     *   Click "Reopen in Container".
     *   It will instantly connect to your existing, pre-compiled container (it will not re-run the slow build).

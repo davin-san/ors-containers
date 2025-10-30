@@ -31,6 +31,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     vim \
     ccache \
+    lld \
+    clang \
     nodejs \
     npm \
     && rm -rf /var/lib/apt/lists/*
@@ -55,11 +57,16 @@ RUN ln -s /usr/bin/ccache /usr/local/bin/g++
 RUN ln -s /usr/bin/ccache /usr/local/bin/gcc
 RUN ln -s /usr/bin/ccache /usr/local/bin/c++
 RUN ln -s /usr/bin/ccache /usr/local/bin/cc
+RUN ln -s /usr/bin/ccache /usr/local/bin/clang
+RUN ln -s /usr/bin/ccache /usr/local/bin/clang++
 ENV PATH="/usr/local/bin:${PATH}"
+
+# Tell ccache to ignore __DATE__ and __TIME__ macros,
+# which gem5 uses and would otherwise bust the cache on every build.
+ENV CCACHE_SLOPPINESS=time_macros
 
 # --- 4. Set workdir to where our code will live ---
 WORKDIR /workspace
-
 
 # --- 5. Add our build and setup scripts ---
 COPY gem5-build.sh /usr/local/bin/gem5-build
